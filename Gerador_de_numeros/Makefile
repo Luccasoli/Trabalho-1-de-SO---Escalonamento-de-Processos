@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -g
+CXXFLAGS = -Wall -g -std=c++11
 
 main: main.o Numero.o
 	$(CXX) $(CXXFLAGS) -o main main.o Numero.o

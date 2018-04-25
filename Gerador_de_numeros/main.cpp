@@ -1,15 +1,14 @@
-#include <iostream>
+#include <bits/stdc++.h>
 #include "Numero.h"
+//#include <random>
 
 using namespace std;
 
 int main(){
 
-	Numero n;
-	//n.valor = 3;
-	cout << n.valor << '\n';
+	Numero n1;
 
-	cout << "Somatorio: " << n.somatorio() << "\n";
+	cout << n1.valor << endl;    
 
 	return 0;
 }

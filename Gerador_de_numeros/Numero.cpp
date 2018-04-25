@@ -1,9 +1,18 @@
-#include "Numero.h"
 #include <bits/stdc++.h>
+#include "Numero.h"
+//#include <random>
+
+using namespace std;
 
 void Numero::gera_num(){
-	std::srand(std::time(0));
-	valor = rand() % 10000 + 1;
+
+	random_device r;
+
+    // Choose a random mean between 1 and 10000
+    default_random_engine e1(r());
+    uniform_int_distribution<int> uniform_dist(1, 10000);
+
+    valor = uniform_dist(e1);
 }
 
 int Numero::somatorio(){
