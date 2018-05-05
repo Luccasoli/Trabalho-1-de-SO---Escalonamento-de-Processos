@@ -1,6 +1,4 @@
-#include <iostream>
-#include <thread>
-#include <random>
+#include <bits/stdc++.h>
 #include "../Gerador_de_numeros/Numero.h"
 
 using namespace std;
@@ -20,7 +18,12 @@ void func(){
 
 int main(){
 
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < 10; i++){
+		cout << i << '\n';
+		this_thread::sleep_for (std::chrono::seconds(1));
+	}
+
+	/*for(int i = 0; i < 5; i++){
 		thread t1;
 		t1 = thread(gera_num);
 		
@@ -29,6 +32,7 @@ int main(){
 		t2.join();
 		t1.join();
 	}
+	*/
 
 	/*
 	cout << "Joinable antes de iniciar: " << t1.joinable() << endl;
