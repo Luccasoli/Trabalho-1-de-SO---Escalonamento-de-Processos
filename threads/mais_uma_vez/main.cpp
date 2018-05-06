@@ -96,7 +96,7 @@ void fcfs(){
     gerador_de_proc.join();
 }
 
-void gera_num_sjf(priority_queue<int, vector<int>, greater<int> > * q){
+void gera_num_sjf_nao_preemptivo(priority_queue<int, vector<int>, greater<int> > * q){
     int num_gerado;
     for(int i = 1; i <= N_CLIENTES; i++){
         m.lock();
@@ -113,7 +113,7 @@ void gera_num_sjf(priority_queue<int, vector<int>, greater<int> > * q){
     }
 }
 
-void sjf(){
+void sjf_nao_preemptivo(){
     priority_queue<int, vector<int>, greater<int> >  pq;
 
     thread escalonador;
