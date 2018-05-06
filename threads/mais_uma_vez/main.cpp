@@ -19,7 +19,7 @@ void dorme_milisegundos(int tempo){
 // Começa mesmo aqui
 
 mutex m;
-queue<int> q;
+
 int tempo;
 int t_gera_num = 0;
 int t_somatorio = 0;
@@ -54,7 +54,7 @@ int somatorio(int valor){
 	return soma;
 }
 
-void pega_numeros(){
+void gera_num_fcfs(queue<int>* q){
     int num_gerado;
     for(int i = 1; i <= N_CLIENTES; i++){
         m.lock();
@@ -62,8 +62,8 @@ void pega_numeros(){
         num_gerado = gera_num();
         t_gera_num += num_gerado;
         
-        q.push(num_gerado);
-        cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << q.back() << " e demora " << t_gera_num/100 << "ms\n";
+        q->push(num_gerado);
+        cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << q->back() << " e demora " << t_gera_num/100 << "ms\n";
         
         m.unlock();
         dorme_milisegundos(num_gerado/100);
@@ -71,9 +71,9 @@ void pega_numeros(){
 }
 
 void fcfs(){
-
+    queue<int> q;
     thread escalonador;
-    thread gerador_de_proc = thread(pega_numeros);
+    thread gerador_de_proc = thread(gera_num_fcfs, &q);
     int cont = 1; // Ele quem diz quando o escalonador deve terminar
 
     while(1){
@@ -96,9 +96,54 @@ void fcfs(){
     gerador_de_proc.join();
 }
 
+void gera_num_sjf(priority_queue<int, vector<int>, greater<int> > * q){
+    int num_gerado;
+    for(int i = 1; i <= N_CLIENTES; i++){
+        m.lock();
+
+        num_gerado = gera_num();
+        t_gera_num += num_gerado;
+        
+        cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << num_gerado << " e demora " << t_gera_num/100 << "ms\n";
+        q->push(num_gerado);
+        
+        
+        m.unlock();
+        //dorme_milisegundos(num_gerado/100);
+    }
+}
+
+void sjf(){
+    priority_queue<int, vector<int>, greater<int> >  pq;
+
+    thread escalonador;
+    thread gerador_de_proc = thread(gera_num_sjf, &pq);
+    int cont = 1; // Ele quem diz quando o escalonador deve terminar
+
+    while(1){
+        if(!pq.empty()){
+            m.lock();
+
+            cout << "\nESCALONADOR: Numero de posicao " << cont << " foi processado:\n";
+            escalonador = thread(somatorio, pq.top());
+            escalonador.join(); // Espera um somatório concluir para depois iniciar outro
+            
+            pq.pop();
+            cont++;
+
+            m.unlock();
+            dorme_milisegundos(tempo/100000);
+        }
+        if(cont > N_CLIENTES)
+            break;
+    }
+    gerador_de_proc.join();
+}
+
 int main(){
 
-    fcfs();
+    //fcfs();
+    sjf();
     
     return 0;
 }
