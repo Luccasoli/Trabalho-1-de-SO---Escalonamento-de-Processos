@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 
 using namespace std;
+#define N_CLIENTES 100
 
 int somatorio(int valor);
 void dorme_segundos(int tempo);
@@ -19,6 +20,9 @@ void dorme_milisegundos(int tempo){
 
 mutex m;
 queue<int> q;
+int tempo;
+int t_gera_num = 0;
+int t_somatorio = 0;
 
 int gera_num(){
 
@@ -41,22 +45,28 @@ int somatorio(int valor){
 		soma += i;
 	}
 
-    cout << "Resultado da soma: " << soma << "\n";
-    dorme_milisegundos(valor/100);
+    t_somatorio += soma;
+
+    cout << "Resultado da soma: " << soma << " e demora " << t_somatorio/100000 << "ms\n";
+    //dorme_milisegundos(soma/1000);
+    tempo = soma;
 
 	return soma;
 }
 
 void pega_numeros(){
-    for(int i = 1; i <= 100; i++){
+    int num_gerado;
+    for(int i = 1; i <= N_CLIENTES; i++){
         m.lock();
 
-        int num_gerado = gera_num();
-        dorme_milisegundos(num_gerado/1000);
+        num_gerado = gera_num();
+        t_gera_num += num_gerado;
+        
         q.push(num_gerado);
-        cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << q.back() << "\n";
+        cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << q.back() << " e demora " << t_gera_num/100 << "ms\n";
         
         m.unlock();
+        dorme_milisegundos(num_gerado/100);
     }
 }
 
@@ -69,15 +79,18 @@ void fcfs(){
     while(1){
         if(q.size()){
             m.lock();
+
             cout << "\nESCALONADOR: Numero de posicao " << cont << " foi processado:\n";
             escalonador = thread(somatorio, q.front());
             escalonador.join(); // Espera um somatório concluir para depois iniciar outro
             
             q.pop();
             cont++;
+
             m.unlock();
+            dorme_milisegundos(tempo/100000);
         }
-        if(cont > 100)
+        if(cont > N_CLIENTES)
             break;
     }
     gerador_de_proc.join();
