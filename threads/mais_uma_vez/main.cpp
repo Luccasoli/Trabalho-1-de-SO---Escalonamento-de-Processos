@@ -117,7 +117,7 @@ void sjf_nao_preemptivo(){
     priority_queue<int, vector<int>, greater<int> >  pq;
 
     thread escalonador;
-    thread gerador_de_proc = thread(gera_num_sjf, &pq);
+    thread gerador_de_proc = thread(gera_num_sjf_nao_preemptivo, &pq);
     int cont = 1; // Ele quem diz quando o escalonador deve terminar
 
     while(1){
@@ -143,7 +143,7 @@ void sjf_nao_preemptivo(){
 int main(){
 
     //fcfs();
-    sjf();
+    sjf_nao_preemptivo();
     
     return 0;
 }
