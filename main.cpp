@@ -3,6 +3,8 @@
 using namespace std;
 #define N_CLIENTES 100
 
+// Declaração de funções
+
 int somatorio(int valor);
 void dorme_segundos(int tempo);
 void dorme_milisegundos(int tempo);
@@ -54,6 +56,8 @@ int somatorio(int valor){
 	return soma;
 }
 
+// FCFS
+
 void gera_num_fcfs(queue<int>* q){
     int num_gerado;
     for(int i = 1; i <= N_CLIENTES; i++){
@@ -71,7 +75,7 @@ void gera_num_fcfs(queue<int>* q){
 }
 
 void fcfs(){
-    queue<int> q;
+    queue< int > q;
     thread escalonador;
     thread gerador_de_proc = thread(gera_num_fcfs, &q);
     int cont = 1; // Ele quem diz quando o escalonador deve terminar
@@ -95,6 +99,8 @@ void fcfs(){
     }
     gerador_de_proc.join();
 }
+
+// SJF NÃO PREEMPTIVO
 
 void gera_num_sjf_nao_preemptivo(priority_queue<int, vector<int>, greater<int> > * q){
     int num_gerado;
@@ -140,10 +146,17 @@ void sjf_nao_preemptivo(){
     gerador_de_proc.join();
 }
 
+// SJF PREEMPTIVO
+struct Numero{
+    double tempo = 1000;
+    int onde_soma_parou = 0;
+    int num_gerado;
+};
+
 int main(){
 
-    //fcfs();
-    sjf_nao_preemptivo();
+    fcfs();
+    //sjf_nao_preemptivo();
     
     return 0;
 }
