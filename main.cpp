@@ -75,6 +75,15 @@ void gera_num_fcfs(queue<int>* q){
 }
 
 void fcfs(){
+    /*
+    * EXPLICAÇÃO:
+    * A thread (1)gerador_de_proc executa a função gera_num_fcfs(queue<int>* q), que gera números aleatórios
+    * e os insere em uma fila em intervalos de tempos aleatórios.
+    * 
+    * A função principal invoca a thread (2)escalonador que executa a função somatorio(int valor), essa função
+    * realiza o somatório de 1 até o número fornecido, em um tempo proporcional ao tamanho do número fornecido.
+    * A função main só é concluida após o (2)escalonador ter esvaziado a fila (processado 100 números).
+    */
     queue< int > q;
     thread escalonador;
     thread gerador_de_proc = thread(gera_num_fcfs, &q);
