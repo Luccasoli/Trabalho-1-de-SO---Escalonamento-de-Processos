@@ -1,9 +1,9 @@
 #include <bits/stdc++.h>
 
 using namespace std;
-#define N_CLIENTES 100
-#define INTERVALO 10000
-#define QUANTUM 10 // Quantidade de somas
+#define N_CLIENTES 10
+#define INTERVALO 5
+#define QUANTUM 2 // Quantidade de somas
 // Declaração de funções
 
 int somatorio(int valor);
@@ -156,7 +156,7 @@ void sjf_nao_preemptivo(){
     gerador_de_proc.join();
 }
 
-// SJF PREEMPTIVO
+// ROUND ROBIN
 struct Numero{
     int posicao = 0;
     int concluida = 0;
@@ -166,7 +166,7 @@ struct Numero{
     int soma_atual = 0;
 };
 
-void gera_num_sjf_preemptivo(queue< Numero > * q){
+void gera_num_round_robin(queue< Numero > * q){
     //int num_gerado;
     int pos = 1;
     for(int i = 1; i <= N_CLIENTES; i++){
@@ -177,16 +177,16 @@ void gera_num_sjf_preemptivo(queue< Numero > * q){
         num.posicao = pos++;
         t_gera_num += num.num_gerado;
         
-        cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << num.num_gerado << " e demora " << t_gera_num/100 << "ms\n";
+        cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << num.num_gerado << "\n";
         q->push(num);
         
         
         m.unlock();
-        dorme_milisegundos(num.num_gerado/100);
+        dorme_milisegundos(num.num_gerado);
     }
 }
 
-void somatorio_sjf_preemptivo(Numero* num){
+void somatorio_round_robin(Numero* num){
 
     int i;
     for(i = num->num_atual; i <= num->num_gerado; i++){
@@ -210,17 +210,17 @@ void somatorio_sjf_preemptivo(Numero* num){
         num->concluida = 0;
     }
 
-void sjf_preemptivo(){
+void round_robin(){
     queue< Numero > qn;
     int cont_num_processados = 1;
     thread escalonador;
-    thread gerador_de_proc = thread(gera_num_sjf_preemptivo, &qn);
+    thread gerador_de_proc = thread(gera_num_round_robin, &qn);
 
     while(1){
         if(!qn.empty()){
             m.lock();
 
-            escalonador = thread(somatorio_sjf_preemptivo, &qn.front());
+            escalonador = thread(somatorio_round_robin, &qn.front());
             escalonador.join();
             //cout << qn.front().num_gerado << " " << qn.front().qnt_somas_realizadas << '\n';
             if(!qn.front().concluida){
@@ -245,7 +245,7 @@ int main(){
 
     //fcfs();
     //sjf_nao_preemptivo();
-    sjf_preemptivo();
+    round_robin();
     
     return 0;
 }
