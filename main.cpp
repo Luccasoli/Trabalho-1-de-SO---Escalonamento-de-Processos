@@ -7,8 +7,10 @@ using namespace std;
 * #define INTERVALO 10
 * #define QUANTUM 5 // Quantidade de somas
 *
-*/
-
+*/ 
+//#define N_CLIENTES 10
+//#define INTERVALO 10
+//#define QUANTUM 5 // Quantidade de somas
 #define N_CLIENTES 100
 #define INTERVALO 10000
 #define QUANTUM 4000 // Quantidade de somas
@@ -30,6 +32,17 @@ void dorme_milisegundos(int tempo){
 // Começa mesmo aqui
 
 mutex m;
+volatile int qnt;
+
+void vazao(int& cont){
+    dorme_segundos(1);
+    
+    m.lock();
+    cout << "\n\n\n\n\nExecutou " << cont << " tarefas em 1 seg\n\n\n\n"; 
+    //qnt = cont;
+    exit(0);
+    m.unlock();
+}
 
 int tempo;
 int t_gera_num = 0;
@@ -95,29 +108,43 @@ void fcfs(){
     */
     queue< int > q;
     thread escalonador;
-    thread gerador_de_proc = thread(gera_num_fcfs, &q);
-    int cont = 0; // Ele quem diz quando o escalonador deve terminar
 
+    // Inicia a o cronômetro pra calcular o tempo de resposta
+    std::clock_t start;
+    double duration = 0;
+    start = std::clock();
+
+    thread gerador_de_proc = thread(gera_num_fcfs, &q);
+    int cont_num_processados = 0; // Ele quem diz quando o escalonador deve terminar
+
+    // Calculam a vazão em 1 seg
+    //thread t = thread(vazao, ref(cont_num_processados));
+    //t.detach();
+ 
     while(1){
         if(q.size()){
             m.lock();
 
-            cout << "\nESCALONADOR: Numero de posicao " << cont << " foi processado:\n";
+            cout << "\nESCALONADOR: Numero de posicao " << cont_num_processados << " foi processado:\n";
             escalonador = thread(somatorio, q.front());
             escalonador.join(); // Espera um somatório concluir para depois iniciar outro
             
             q.pop();
-            cont++;
+            cont_num_processados++;
 
     
-            cout << "*Quantidade de tarefas concluidas: " << cont << "\n";
+            cout << "*Quantidade de tarefas concluidas: " << cont_num_processados << "\n";
             m.unlock();
+
+            // Incrementa o tempo após a conclusão de cada tarefa
+            duration += ( clock() - start ) / (double) CLOCKS_PER_SEC;
             dorme_milisegundos(tempo/100000);
         }
-        if(cont >= N_CLIENTES)
+        if(cont_num_processados >= N_CLIENTES)
             break;
     }
     gerador_de_proc.join();
+    cout<< "Tempo de resposta total: " << duration << " segs\n";
 }
 
 // SJF NÃO PREEMPTIVO
@@ -144,7 +171,11 @@ void sjf_nao_preemptivo(){
 
     thread escalonador;
     thread gerador_de_proc = thread(gera_num_sjf_nao_preemptivo, &pq);
-    int cont = 0; // Ele quem diz quando o escalonador deve terminar
+    int cont_num_processados = 0; // Ele quem diz quando o escalonador deve terminar
+    
+    // Calculam a vazão em 1 seg
+    thread t = thread(vazao, ref(cont_num_processados));
+    t.detach();
 
     while(1){
         if(!pq.empty()){
@@ -155,13 +186,13 @@ void sjf_nao_preemptivo(){
             escalonador.join(); // Espera um somatório concluir para depois iniciar outro
             
             pq.pop();
-            cont++;
+            cont_num_processados++;
 
-            cout << "*Quantidade de tarefas concluidas: " << cont << "\n";
+            cout << "*Quantidade de tarefas concluidas: " << cont_num_processados << "\n";
             m.unlock();
             dorme_milisegundos(tempo/100000);
         }
-        if(cont >= N_CLIENTES)
+        if(cont_num_processados >= N_CLIENTES)
             break;
     }
     gerador_de_proc.join();
@@ -226,9 +257,14 @@ void round_robin(){
     int cont_num_processados = 0;
     thread escalonador;
     thread gerador_de_proc = thread(gera_num_round_robin, &qn);
+    
+    // Calculam a vazão em 1 seg
+    thread t = thread(vazao, ref(cont_num_processados));
+    t.detach();
 
     while(1){
         if(!qn.empty()){
+            
             m.lock();
 
             escalonador = thread(somatorio_round_robin, &qn.front());
@@ -251,7 +287,7 @@ void round_robin(){
             break;
     }
     gerador_de_proc.join();
-
+    //cout << qnt << '\n';
 }
 
 // SRTF (SHORTEST REMAININING TIME FIRST) NÃO FUNCIONA
@@ -370,9 +406,9 @@ void srtf(){
 */
 int main(){
 
-    //fcfs();
+    fcfs();
     //sjf_nao_preemptivo();
-    round_robin();
+    //round_robin();
     //srtf();
     
     return 0;

@@ -1,44 +1,35 @@
-#include <bits/stdc++.h>
+/*
+#include<iostream>
+#include<chrono>
+typedef std::chrono::high_resolution_clock Clock;
 
-using namespace std;
-
-struct thing
+int main()
 {
-    int a;
-    char b;
-    bool operator<(const thing& rhs) const
-    {
-        return a < rhs.a;
+    auto t1 = Clock::now();
+    for(int i = 0; i < 100000; i++){
+
     }
-};
+    auto t2 = Clock::now();
+    std::cout << "Delta t2-t1: " 
+              << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count()
+              << " nanoseconds" << std::endl;
+}*/
 
-struct Numero{
-    int posicao = 0;
-    int concluida = 0;
-    int qnt_somas_realizadas = 0;
-    int num_gerado = 0;
-    int num_atual = 1;
-    int soma_atual = 0;
+#include <iostream>
+#include <cstdio>
+#include <ctime>
 
-    bool operator<(const Numero& n) const
-    {
-        return num_gerado > n.num_gerado;
+int main() {
+    std::clock_t start;
+    double duration;
+
+    start = std::clock();
+
+    /* Your algorithm here */
+for(int i = 0; i < 100000; i++){
+
     }
-};
+    duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
-
-int main(){
-    atomic< int > pq;
-    
-    Numero n[3];
-    n[0].num_gerado = 2;
-    n[1].num_gerado = 1;
-    n[2].num_gerado = 5;
-    priority_queue<Numero> q;
-    q.push(n[2]);
-    q.push(n[1]);
-    cout << q.top().num_gerado << '\n';
-    q.pop();
-    cout << q.top().num_gerado << '\n';
-
+    std::cout<<"printf: "<< duration << " segs\n";
 }
