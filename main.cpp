@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 
 using namespace std;
-#define N_CLIENTES 10
+#define N_CLIENTES 5
 #define INTERVALO 5
 #define QUANTUM 2 // Quantidade de somas
 // Declaração de funções
@@ -70,7 +70,7 @@ void gera_num_fcfs(queue<int>* q){
         q->push(num_gerado);
         cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << q->back() << " e demora " << t_gera_num/100 << "ms\n";
         
-        m.unlock();
+
         dorme_milisegundos(num_gerado/100);
     }
 }
@@ -101,7 +101,7 @@ void fcfs(){
             q.pop();
             cont++;
 
-            m.unlock();
+    
             dorme_milisegundos(tempo/100000);
         }
         if(cont > N_CLIENTES)
@@ -124,7 +124,7 @@ void gera_num_sjf_nao_preemptivo(priority_queue<int, vector<int>, greater<int> >
         q->push(num_gerado);
         
         
-        m.unlock();
+
         //dorme_milisegundos(num_gerado/100);
     }
 }
@@ -147,7 +147,7 @@ void sjf_nao_preemptivo(){
             pq.pop();
             cont++;
 
-            m.unlock();
+    
             dorme_milisegundos(tempo/100000);
         }
         if(cont > N_CLIENTES)
@@ -181,7 +181,7 @@ void gera_num_round_robin(queue< Numero > * q){
         q->push(num);
         
         
-        m.unlock();
+
         dorme_milisegundos(num.num_gerado);
     }
 }
@@ -208,7 +208,7 @@ void somatorio_round_robin(Numero* num){
     }
     else
         num->concluida = 0;
-    }
+}
 
 void round_robin(){
     queue< Numero > qn;
@@ -232,7 +232,7 @@ void round_robin(){
                 cout << "\nConcluiu\n\n";
             }
             qn.pop();
-            m.unlock();
+    
         }
         if(cont_num_processados > N_CLIENTES)
             break;
@@ -241,11 +241,130 @@ void round_robin(){
 
 }
 
+// SRTF (SHORTEST REMAININING TIME FIRST)
+
+volatile bool troca = 0;
+mutex m1, m2;
+
+struct Numero_srtf{
+    int posicao = 0;
+    int concluida = 0;
+    int qnt_somas_realizadas = 0;
+    int num_gerado = 0;
+    int num_atual = 1;
+    int soma_atual = 0;
+
+    bool operator<(const Numero_srtf& n) const
+    {
+        return num_gerado > n.num_gerado;
+    }
+};
+
+void gera_num_srtf(priority_queue< Numero_srtf > * q){
+    //int num_gerado;
+    for(int i = 1; i <= N_CLIENTES; i++){
+        
+
+        Numero_srtf num;
+        num.num_gerado = gera_num();
+        num.posicao = i;
+        t_gera_num += num.num_gerado;
+        
+        cout << "\nGERADOR: Numero de posicao " << i << " foi gerado: " << num.num_gerado << "\n";
+
+        if(i > 1){
+            if(num.num_gerado < q->top().num_gerado)
+                troca = 1;
+        }
+        q->push(num);
+
+        m1.unlock();
+        dorme_milisegundos(num.num_gerado);
+    }
+}
+
+void somatorio_srtf(Numero_srtf& num, priority_queue<Numero_srtf>& pq){
+    int i;
+    
+    for(i = num.num_atual; i <= num.num_gerado; i++){
+
+        int aux = pq.top().num_gerado;
+
+
+        if(troca){
+            cout << "***Um número menor chegou na fila (" << aux << ").\n";
+            break;
+        }
+        else{
+            //m.lock();
+            num.soma_atual += i;
+            num.qnt_somas_realizadas++;
+
+            cout << "Numero: " << num.num_gerado << ", de posicao: " << num.posicao << ", o somatorio agora vale: " << num.soma_atual << "\n";
+            
+        }
+        
+        
+        dorme_milisegundos(num.soma_atual % 7);
+    }
+    //m.lock();
+    if(!troca and i >= num.num_gerado){
+        num.concluida = 1;
+        cout << "Numero: " << num.num_gerado << ", de posicao: " << num.posicao << ", concluido, resultado: " << num.soma_atual << '\n';
+    }
+    else
+        num.concluida = 0;
+    m1.unlock();
+}
+
+void srtf(){
+    priority_queue<Numero_srtf>  pq;
+
+    thread escalonador;
+    thread gerador_de_proc = thread(gera_num_srtf, &pq);
+    int cont_num_processados = 1; // Ele quem diz quando o escalonador deve terminar
+
+    while(1){
+        if(!pq.empty()){
+    
+
+            Numero_srtf aux = pq.top();
+            
+            escalonador = thread(somatorio_srtf, ref(aux), ref(pq));
+    
+            
+            escalonador.join();
+    
+            //m.lock();
+            //cout << qn.front().num_gerado << " " << qn.front().qnt_somas_realizadas << '\n';
+    
+            if(!aux.concluida){
+                pq.push(aux);
+                troca = 0;
+                cout << "\nIndo para o proximo da fila!\n";
+            }
+            
+            else{
+                cont_num_processados++;
+                cout << "\nConcluiu\n\n";
+            }
+            pq.pop();
+            dorme_milisegundos(50);
+            m1.unlock();
+    
+        }
+        if(cont_num_processados > N_CLIENTES)
+            break;
+    }
+    gerador_de_proc.join();
+}
+
 int main(){
 
     //fcfs();
     //sjf_nao_preemptivo();
-    round_robin();
+    //round_robin();
+    srtf();
     
     return 0;
 }
