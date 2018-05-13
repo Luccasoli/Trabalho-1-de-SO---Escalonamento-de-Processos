@@ -13,7 +13,7 @@ using namespace std;
 //#define QUANTUM 5 // Quantidade de somas
 #define N_CLIENTES 100
 #define INTERVALO 10000
-#define QUANTUM 4000 // Quantidade de somas
+#define QUANTUM 5000 // Quantidade de somas
 // Declaração de funções
 
 int somatorio(int valor);
@@ -250,9 +250,11 @@ void somatorio_round_robin(Numero* num){
 
         cout << "Numero: " << num->num_gerado << ", de posicao: " << num->posicao << ", o somatorio agora vale: " << num->soma_atual << "\n";
         
+        
         if(num->qnt_somas_realizadas % QUANTUM == 0 and num->qnt_somas_realizadas < num->num_gerado){
             num->num_atual = i+1;
             cout << "Quantum = " << QUANTUM << " estourou do numero: " << num->num_gerado << "\n";
+            //exit(0);
             break;
         }
     }
@@ -262,13 +264,20 @@ void somatorio_round_robin(Numero* num){
     }
     else
         num->concluida = 0;
-        dorme_milisegundos(1);
+    dorme_milisegundos(1);
+    tempo = num->soma_atual;
 }
 
 void round_robin(){
     queue< Numero > qn;
     int cont_num_processados = 0;
     thread escalonador;
+
+    // Inicia a o cronômetro pra calcular o tempo de resposta
+    std::clock_t start;
+    double duration = 0;
+    start = std::clock();
+
     thread gerador_de_proc = thread(gera_num_round_robin, &qn);
     
     // Calculam a vazão em 1 seg
@@ -288,18 +297,23 @@ void round_robin(){
                 cout << "\nIndo para o proximo da fila!\n";
             }
             else{
+                // Incrementa o tempo após a conclusão de cada tarefa
+                duration += ( clock() - start ) / (double) CLOCKS_PER_SEC;
+
                 cont_num_processados++;
                 cout << "\nConcluiu\n\n";
                 cout << "*Quantidade de tarefas concluidas: " << cont_num_processados << "\n";
             }
             qn.pop();
             m.unlock();
-            dorme_milisegundos(tempo/100000);
+            dorme_milisegundos(tempo/10000000);
         }
         if(cont_num_processados >= N_CLIENTES)
             break;
     }
     gerador_de_proc.join();
+
+    cout<< "Tempo de resposta total: " << duration << " segs\n";
     //cout << qnt << '\n';
 }
 
@@ -420,8 +434,8 @@ void srtf(){
 int main(){
 
     //fcfs();
-    sjf_nao_preemptivo();
-    //round_robin();
+    //sjf_nao_preemptivo();
+    round_robin();
     //srtf();
     
     return 0;
