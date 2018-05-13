@@ -138,12 +138,14 @@ void fcfs(){
 
             // Incrementa o tempo após a conclusão de cada tarefa
             duration += ( clock() - start ) / (double) CLOCKS_PER_SEC;
+
             dorme_milisegundos(tempo/100000);
         }
         if(cont_num_processados >= N_CLIENTES)
             break;
     }
     gerador_de_proc.join();
+
     cout<< "Tempo de resposta total: " << duration << " segs\n";
 }
 
@@ -168,14 +170,19 @@ void gera_num_sjf_nao_preemptivo(priority_queue<int, vector<int>, greater<int> >
 
 void sjf_nao_preemptivo(){
     priority_queue<int, vector<int>, greater<int> >  pq;
-
     thread escalonador;
+
+    // Inicia a o cronômetro pra calcular o tempo de resposta
+    std::clock_t start;
+    double duration = 0;
+    start = std::clock();
+
     thread gerador_de_proc = thread(gera_num_sjf_nao_preemptivo, &pq);
     int cont_num_processados = 0; // Ele quem diz quando o escalonador deve terminar
     
     // Calculam a vazão em 1 seg
-    thread t = thread(vazao, ref(cont_num_processados));
-    t.detach();
+    //thread t = thread(vazao, ref(cont_num_processados));
+    //t.detach();
 
     while(1){
         if(!pq.empty()){
@@ -190,12 +197,18 @@ void sjf_nao_preemptivo(){
 
             cout << "*Quantidade de tarefas concluidas: " << cont_num_processados << "\n";
             m.unlock();
+
+            // Incrementa o tempo após a conclusão de cada tarefa
+            duration += ( clock() - start ) / (double) CLOCKS_PER_SEC;
+
             dorme_milisegundos(tempo/100000);
         }
         if(cont_num_processados >= N_CLIENTES)
             break;
     }
     gerador_de_proc.join();
+
+    cout<< "Tempo de resposta total: " << duration << " segs\n";
 }
 
 // ROUND ROBIN
@@ -259,8 +272,8 @@ void round_robin(){
     thread gerador_de_proc = thread(gera_num_round_robin, &qn);
     
     // Calculam a vazão em 1 seg
-    thread t = thread(vazao, ref(cont_num_processados));
-    t.detach();
+    //thread t = thread(vazao, ref(cont_num_processados));
+    //t.detach();
 
     while(1){
         if(!qn.empty()){
@@ -406,8 +419,8 @@ void srtf(){
 */
 int main(){
 
-    fcfs();
-    //sjf_nao_preemptivo();
+    //fcfs();
+    sjf_nao_preemptivo();
     //round_robin();
     //srtf();
     
